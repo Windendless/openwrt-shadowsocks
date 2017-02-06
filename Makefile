@@ -12,9 +12,9 @@ PKG_VERSION:=3.0.0
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/shadowsocks/shadowsocks-libev.git
+PKG_SOURCE_URL:=https://github.com/windendless/shadowsocks-libev.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_RELEASE)
-PKG_SOURCE_VERSION:=833594e3c637c4cad629ff95b3d3d37c31f2927b
+PKG_SOURCE_VERSION:=e7252cb0828cafdab3f951512c7838b95ee9f510
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.xz
 
 PKG_LICENSE:=GPLv3
@@ -47,7 +47,7 @@ endef
 
 Package/shadowsocks-libev-server/description = $(Package/shadowsocks-libev/description)
 
-CONFIGURE_ARGS += --disable-ssp --disable-documentation --disable-assert --with-crypto-library=mbedtls
+CONFIGURE_ARGS += --disable-ssp --disable-documentation --disable-assert --with-crypto-library=mbedtls --enable-system-shared-lib
 
 define Package/shadowsocks-libev/install
 	$(INSTALL_DIR) $(1)/usr/bin
