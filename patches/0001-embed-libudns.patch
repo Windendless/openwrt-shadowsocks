@@ -1,0 +1,100 @@
+From dcedfdd6504c0cfe9917b9c3599132d02db309cc Mon Sep 17 00:00:00 2001
+From: Windendless <my8159@gmail.com>
+Date: Mon, 6 Feb 2017 15:00:41 +0800
+Subject: [PATCH] embed libudns
+
+---
+ Makefile.am     |  2 +-
+ configure.ac    |  6 ++----
+ src/Makefile.am | 21 +++------------------
+ 3 files changed, 6 insertions(+), 23 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 148bdba..7ec938a 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,5 +1,5 @@
+ if USE_SYSTEM_SHARED_LIB
+-SUBDIRS = libcork libipset src
++SUBDIRS = libcork libipset libudns src
+ else
+ SUBDIRS = libsodium libcork libipset libudns libev src
+ endif
+diff --git a/configure.ac b/configure.ac
+index 6e8abc9..b88a9b7 100755
+--- a/configure.ac
++++ b/configure.ac
+@@ -281,16 +281,14 @@ dnl This is an option defined in the origin configure script
+ AC_DEFINE([HAVE_IPv6], [1], [Enable IPv6 support in libudns])
+ 
+ AM_COND_IF([USE_SYSTEM_SHARED_LIB],[
+-    AC_CHECK_HEADERS([udns.h], [], [AC_MSG_ERROR([Couldn't find libudns. Try installing libudns-dev or udns-devel.])])
+-    AC_CHECK_LIB([udns], [dns_dnlen], [LIBS="-ludns $LIBS"], [AC_MSG_ERROR([Couldn't find libudns. Try installing libudns-dev or udns-devel.])])
+     AC_CHECK_HEADERS([ev.h], [], [AC_MSG_ERROR([Couldn't find libev. Try installing libev-dev@<:@el@:>@.])])
+     AC_CHECK_LIB([ev], [ev_loop_destroy], [LIBS="-lev $LIBS"], [AC_MSG_ERROR([Couldn't find libev. Try installing libev-dev@<:@el@:>@.])])
+   ],
+-  [AC_CONFIG_FILES([libudns/Makefile
+-                 libev/Makefile])])
++  [AC_CONFIG_FILES([libev/Makefile])])
+ 
+ AC_CONFIG_FILES([ shadowsocks-libev.pc
+                  Makefile
++                 libudns/Makefile
+                  libcork/Makefile
+                  libipset/Makefile
+                  src/Makefile])
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 92fa036..4e8d1e4 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -4,14 +4,15 @@ AM_CFLAGS = -g -O2 -Wall -Werror -Wno-deprecated-declarations -fno-strict-aliasi
+ AM_CFLAGS += $(PTHREAD_CFLAGS)
+ if !USE_SYSTEM_SHARED_LIB
+ AM_CFLAGS += -I$(top_srcdir)/libev
+-AM_CFLAGS += -I$(top_srcdir)/libudns
+ AM_CFLAGS += -I$(top_srcdir)/libsodium/src/libsodium/include
+ endif
++AM_CFLAGS += -I$(top_srcdir)/libudns
+ AM_CFLAGS += -I$(top_srcdir)/libipset/include
+ AM_CFLAGS += -I$(top_srcdir)/libcork/include
+ AM_CFLAGS += $(LIBPCRE_CFLAGS)
+ 
+-SS_COMMON_LIBS = $(top_builddir)/libipset/libipset.la \
++SS_COMMON_LIBS = $(top_builddir)/libudns/libudns.la \
++                 $(top_builddir)/libipset/libipset.la \
+                  $(top_builddir)/libcork/libcork.la \
+                  $(INET_NTOP_LIB) $(LIBPCRE_LIBS)
+ if USE_SYSTEM_SHARED_LIB
+@@ -81,17 +82,6 @@ ss_local_LDADD = $(SS_COMMON_LIBS)
+ ss_tunnel_LDADD = $(SS_COMMON_LIBS)
+ ss_server_LDADD = $(SS_COMMON_LIBS)
+ ss_manager_LDADD = $(SS_COMMON_LIBS)
+-if USE_SYSTEM_SHARED_LIB
+-ss_local_LDADD += -ludns
+-ss_tunnel_LDADD += -ludns
+-ss_server_LDADD += -ludns
+-ss_manager_LDADD += -ludns
+-else
+-ss_local_LDADD += $(top_builddir)/libudns/libudns.la
+-ss_tunnel_LDADD += $(top_builddir)/libudns/libudns.la
+-ss_server_LDADD += $(top_builddir)/libudns/libudns.la
+-ss_manager_LDADD += $(top_builddir)/libudns/libudns.la
+-endif
+ 
+ ss_local_CFLAGS = $(AM_CFLAGS) -DMODULE_LOCAL
+ ss_tunnel_CFLAGS = $(AM_CFLAGS) -DMODULE_TUNNEL
+@@ -119,11 +109,6 @@ ss_redir_SOURCES = utils.c \
+ 
+ ss_redir_CFLAGS = $(AM_CFLAGS) -DMODULE_REDIR
+ ss_redir_LDADD = $(SS_COMMON_LIBS)
+-if USE_SYSTEM_SHARED_LIB
+-ss_redir_LDADD += -ludns
+-else
+-ss_redir_LDADD += $(top_builddir)/libudns/libudns.la
+-endif
+ endif
+ 
+ lib_LTLIBRARIES = libshadowsocks-libev.la
+-- 
+2.10.0
+
